@@ -1,0 +1,22 @@
+{
+  "name": "json-server",
+  "version": "0.0.1",
+  "description": "Server for Airways",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server",
+    "nodemon": "nodemon server"
+  },
+  "keywords": [
+    "Airways",
+    "Final",
+    "Task",
+    "Rsschool"
+  ],
+  "author": "BrBrov",
+  "license": "ISC",
+  "devDependencies": {
+    "json-server": "^0.17.3",
+    "nodemon": "^2.0.22"
+  }
+}
