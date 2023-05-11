@@ -1,8 +1,7 @@
+const db = require('./utils/convert');
 const cities = require('./routes/cities');
 const jsonServer = require('json-server');
 const server = jsonServer.create();
-
-
 
 server.use('/cities', cities);
 

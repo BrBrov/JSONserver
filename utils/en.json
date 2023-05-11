@@ -36,15 +36,6 @@
       "main_airport_name": "Tan Son Nhat International Airport"
   },
   {
-      "id": "008ca891-71d0-47b3-8bbc-12d1d16d9236",
-      "type": "country",
-      "code": "FI",
-      "name": "Finland",
-      "index_strings": [],
-      "weight": 10530,
-      "cases": null
-  },
-  {
       "id": "8c4ae1b5-5a26-4bad-84cb-2ffb6839dcde",
       "type": "city",
       "code": "HEL",
