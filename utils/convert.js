@@ -3,6 +3,7 @@
 const dbAviasales = require('./en.json');
 
 class Ticket {
+	id = 0;
 	date = ''; // ISO-8601 date and time to flight
 	placeCount = 0; //count must be from 0 to 100
 	direction = ''; //destination
@@ -53,7 +54,7 @@ class ConstructorCity {
 
 
 class TicketConstructor {
-	constructor(date, city, destination) {
+	constructor(date, city, destination, id) {
 		this.ticket = new Ticket();
 		this.currency = {
 			eur: 1,
@@ -66,6 +67,7 @@ class TicketConstructor {
 		this.#ticketFromTo(city, destination);
 		this.#ticketPrice(city, destination);
 		this.ticket.date = date;
+		this.ticket.id = id;
 	}
 
 	getTicket() {
@@ -110,19 +112,19 @@ class TicketConstructor {
 	#ticketPrice(city, destination) {
 		const distance = this.#countDistance(city.coordinates, destination.coordinates);
 		this.ticket.priceAdult.eur = distance * 0.05;
-		this.ticket.priceAdult.usa = this.ticket.priceAdult.eur * this.currency.usa;
-		this.ticket.priceAdult.rub = this.ticket.priceAdult.eur * this.currency.rub;
-		this.ticket.priceAdult.pln = this.ticket.priceAdult.eur * this.currency.pln;
+		this.ticket.priceAdult.usa = Math.round(this.ticket.priceAdult.eur * this.currency.usa * 100) /100;
+		this.ticket.priceAdult.rub = Math.round(this.ticket.priceAdult.eur * this.currency.rub * 100) /100;
+		this.ticket.priceAdult.pln = Math.round(this.ticket.priceAdult.eur * this.currency.pln * 100) /100;
 
-		this.ticket.priceChild.eur = this.ticket.priceAdult.eur * 0.75;
-		this.ticket.priceChild.usa = this.ticket.priceAdult.usa * 0.75;
-		this.ticket.priceChild.rub = this.ticket.priceAdult.rub * 0.75;
-		this.ticket.priceChild.pln = this.ticket.priceAdult.pln * 0.75;
+		this.ticket.priceChild.eur = Math.round(this.ticket.priceAdult.eur * 0.75 * 100) /100;
+		this.ticket.priceChild.usa = Math.round(this.ticket.priceAdult.usa * 0.75 * 100) /100;
+		this.ticket.priceChild.rub = Math.round(this.ticket.priceAdult.rub * 0.75 * 100) /100;
+		this.ticket.priceChild.pln = Math.round(this.ticket.priceAdult.pln * 0.75 * 100) /100;
 
-		this.ticket.priceInfant.eur = this.ticket.priceAdult.eur * 0.5;
-		this.ticket.priceInfant.usa = this.ticket.priceAdult.usa * 0.5;
-		this.ticket.priceInfant.rub = this.ticket.priceAdult.rub * 0.5;
-		this.ticket.priceInfant.pln = this.ticket.priceAdult.pln * 0.5;
+		this.ticket.priceInfant.eur = Math.round(this.ticket.priceAdult.eur * 0.5 * 100) /100;
+		this.ticket.priceInfant.usa = Math.round(this.ticket.priceAdult.usa * 0.5 * 100) /100;
+		this.ticket.priceInfant.rub = Math.round(this.ticket.priceAdult.rub * 0.5 * 100) /100;
+		this.ticket.priceInfant.pln = Math.round(this.ticket.priceAdult.pln * 0.5 * 100) /100;
 	}
 
 }
@@ -149,15 +151,15 @@ class DBFactory {
 			this.db.forEach(destination => {
 				if (city.name !== destination.name) {
 					city.tickets[`${destination.name}`] = [];
-				let countTicket = 20;
-				while (countTicket) {
+				let countTicket = 0;
+				while (countTicket < 20) {
 					const date = this.#randomDate(controlDate, datePerYear);
 					const isApson = city.tickets[`${destination.name}`].some(ticket => ticket.date === date && ticket.name === destination.name);
 					if (!isApson) {
 						const dateISO = new Date(date).toISOString();
-						const ticket = new TicketConstructor(dateISO, city, destination);
+						const ticket = new TicketConstructor(dateISO, city, destination, countTicket);
 						city.tickets[`${destination.name}`].push(ticket.getTicket());
-						countTicket -= 1;
+						countTicket += 1;
 					}
 				}
 				city.tickets[`${destination.name}`] = this.#sortTicketsArray(city.tickets[`${destination.name}`]);
@@ -199,7 +201,7 @@ class DBFactory {
 function createDB() {
 	const factory = new DBFactory(dbAviasales);
 	const base = factory.getDB();
-	console.log('create!!!');
+	console.log('Create cities database!!!');
 	return function () {
 		return base;
 	}
