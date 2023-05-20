@@ -6,25 +6,25 @@ const router = express.Router();
 //mokk data
 
 const mokUser1 = {
-  email: 'pupkin@mail.com',
-  firstName: 'Vasia',
-  lastName: 'Pupkin',
-  birthDate: '1990-01-01T19:00:00',
-  gender: 'male',
-  mobile: '+375297777777',
-  citizen: 'town',
-  password: '123456'
+	email: 'pupkin@mail.com',
+	firstName: 'Vasia',
+	lastName: 'Pupkin',
+	birthDate: '1990-01-01T19:00:00',
+	gender: 'male',
+	mobile: '+375297777777',
+	citizen: 'town',
+	password: '123456'
 };
 
 const mokUser2 = {
-  email: 'pupkina@mail.com',
-  firstName: 'Vasilisa',
-  lastName: 'Pupkina',
-  birthDate: '1995-01-01T19:00:00',
-  gender: 'female',
-  mobile: '+375296666666',
-  citizen: 'town',
-  password: '654321'
+	email: 'pupkina@mail.com',
+	firstName: 'Vasilisa',
+	lastName: 'Pupkina',
+	birthDate: '1995-01-01T19:00:00',
+	gender: 'female',
+	mobile: '+375296666666',
+	citizen: 'town',
+	password: '654321'
 };
 
 db.setUser(mokUser1);
@@ -36,38 +36,56 @@ console.log(db);
 router.use(parser.json());
 
 router.use((err, req, res, next) => {
-  if (err) {
-    res.status(400);
-		res.json({request: 'JSON data failed!'});
-  } else {
-    next();
-  }
+	if (err) {
+		res.status(400);
+		res.json({ request: 'JSON data failed!' });
+	} else {
+		next();
+	}
 })
 
 router.route('')
-.get((req, res) => {
-	const idIn  = db.findUserById(req.query.id);
+	.get((req, res) => {
+		const idIn = db.findUserById(req.query.id);
 
-	if (idIn) {
-		const id = Object.keys(idIn)[0];
-		idIn[id].id = id;
-		res.json(idIn[id]);
-	} else {
-		res.status(404);
-		res.json({request: 'failed'});
-	}
-})
-.post((req, res) => {
-	const result = db.setUser(req.body);
+		if (idIn) {
+			const id = Object.keys(idIn)[0];
+			idIn[id].id = id;
+			res.json(idIn[id]);
+		} else {
+			res.status(404);
+			res.json({ request: 'failed' });
+		}
+	})
+	.post((req, res) => {
 
-	console.log(db);
+		console.log(req.headers);
 
-	if (!result) {
-		res.status(302);
-		return res.json({reqest: 'User already have been registered!'});
-	}
+		if (req.headers.authorization === 'false') {
+			const result = db.setUser(req.body);
 
-	res.json(result);
-})
+			console.log(db);
+
+			if (!result) {
+				res.status(302);
+				return res.json({ reqest: 'User already have been registered!' });
+			}
+
+			res.json(result);
+		} else {
+
+			const user = db.getUser(req.body);
+
+			if (!user) {
+				res.status(400);
+				res.json({requst: 'Input data wrong!'});
+			}
+
+			res.send(user);
+		}
+	})
+	.patch((req, res) => {
+		
+	})
 
 module.exports = router;

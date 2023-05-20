@@ -71,8 +71,17 @@ class UserDB {
 		return null;
 	}
 
-	#createID(mail) {
+	getUser(json) {
+		const user = this.users.find((userData) => {
+			const id = Object.keys(userData);
+			if (json.email === userData[id].email && json.password === userData[id].password) {
+				return userData;
+			}
+		});
 
+		if (!user) return null;
+
+		return user.getUser();
 	}
 
 	findUserByData(json) {
