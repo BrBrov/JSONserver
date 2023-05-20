@@ -9,6 +9,7 @@ class Ticket {
 	direction = ''; //destination
 	form = '';
 	to = '';
+	wayTime = '';
 	numberOfFlight = '';
 	priceAdult = {
 		eur: 0,
@@ -112,19 +113,19 @@ class TicketConstructor {
 	#ticketPrice(city, destination) {
 		const distance = this.#countDistance(city.coordinates, destination.coordinates);
 		this.ticket.priceAdult.eur = distance * 0.05;
-		this.ticket.priceAdult.usa = Math.round(this.ticket.priceAdult.eur * this.currency.usa * 100) /100;
-		this.ticket.priceAdult.rub = Math.round(this.ticket.priceAdult.eur * this.currency.rub * 100) /100;
-		this.ticket.priceAdult.pln = Math.round(this.ticket.priceAdult.eur * this.currency.pln * 100) /100;
+		this.ticket.priceAdult.usa = Math.round(this.ticket.priceAdult.eur * this.currency.usa * 100) / 100;
+		this.ticket.priceAdult.rub = Math.round(this.ticket.priceAdult.eur * this.currency.rub * 100) / 100;
+		this.ticket.priceAdult.pln = Math.round(this.ticket.priceAdult.eur * this.currency.pln * 100) / 100;
 
-		this.ticket.priceChild.eur = Math.round(this.ticket.priceAdult.eur * 0.75 * 100) /100;
-		this.ticket.priceChild.usa = Math.round(this.ticket.priceAdult.usa * 0.75 * 100) /100;
-		this.ticket.priceChild.rub = Math.round(this.ticket.priceAdult.rub * 0.75 * 100) /100;
-		this.ticket.priceChild.pln = Math.round(this.ticket.priceAdult.pln * 0.75 * 100) /100;
+		this.ticket.priceChild.eur = Math.round(this.ticket.priceAdult.eur * 0.75 * 100) / 100;
+		this.ticket.priceChild.usa = Math.round(this.ticket.priceAdult.usa * 0.75 * 100) / 100;
+		this.ticket.priceChild.rub = Math.round(this.ticket.priceAdult.rub * 0.75 * 100) / 100;
+		this.ticket.priceChild.pln = Math.round(this.ticket.priceAdult.pln * 0.75 * 100) / 100;
 
-		this.ticket.priceInfant.eur = Math.round(this.ticket.priceAdult.eur * 0.5 * 100) /100;
-		this.ticket.priceInfant.usa = Math.round(this.ticket.priceAdult.usa * 0.5 * 100) /100;
-		this.ticket.priceInfant.rub = Math.round(this.ticket.priceAdult.rub * 0.5 * 100) /100;
-		this.ticket.priceInfant.pln = Math.round(this.ticket.priceAdult.pln * 0.5 * 100) /100;
+		this.ticket.priceInfant.eur = Math.round(this.ticket.priceAdult.eur * 0.5 * 100) / 100;
+		this.ticket.priceInfant.usa = Math.round(this.ticket.priceAdult.usa * 0.5 * 100) / 100;
+		this.ticket.priceInfant.rub = Math.round(this.ticket.priceAdult.rub * 0.5 * 100) / 100;
+		this.ticket.priceInfant.pln = Math.round(this.ticket.priceAdult.pln * 0.5 * 100) / 100;
 	}
 
 }
@@ -145,33 +146,89 @@ class DBFactory {
 	}
 
 	createOutputDB() {
-		let controlDate = this.dateNow.getTime();
-		let datePerYear = controlDate + 2678400;
-		this.dBase = this.citiesArr.map(city => {
-			this.db.forEach(destination => {
-				if (city.name !== destination.name) {
-					city.tickets[`${destination.name}`] = [];
-				let countTicket = 0;
-				while (countTicket < 20) {
-					const date = this.#randomDate(controlDate, datePerYear);
-					const isApson = city.tickets[`${destination.name}`].some(ticket => ticket.date === date && ticket.name === destination.name);
-					if (!isApson) {
-						const dateISO = new Date(date).toISOString();
-						const ticket = new TicketConstructor(dateISO, city, destination, countTicket);
-						city.tickets[`${destination.name}`].push(ticket.getTicket());
-						countTicket += 1;
+		// TODO: Bug!
+		const year = this.dateNow.getFullYear();
+		const month = this.dateNow.getMonth();
+		const hour = this.dateNow.getHours();
+		const minute = this.dateNow.getMinutes();
+
+		this.dBase = this.citiesArr.map((city) => {
+
+			this.db.forEach((destination) => {
+
+				if (destination.name !== city.name) {
+					let ticketsArray = [];
+					let controlDateArray = [];
+					let countTickets = 0;
+					//2023-05-20T19:13:02.977Z
+					while (countTickets < 20) {
+						let ticketMonth = 0;
+						let ticketYear = year;
+						let ticketDate = 0;
+						if (countTickets < (20 / 2)) {
+							ticketMonth = month;
+							ticketDate = this.#random(1, this.#getDaysInMonth(ticketMonth));
+
+						} else {
+							ticketMonth = month + 1;
+
+							if (ticketMonth > 11) {
+								ticketMonth = 0;
+								ticketYear = year + 1;
+							}
+
+							ticketDate = this.#random(1, this.#getDaysInMonth(ticketMonth));
+						}
+
+						ticketMonth = ticketMonth < 10 ? `0${ticketMonth}` : `${ticketMonth}`;
+						ticketDate = ticketDate < 10 ? `0${ticketDate}` : `${ticketDate}`;
+
+						let fullTicketDate = `${ticketYear}-${ticketMonth}-${ticketDate}T`;
+
+						const controlDateInArray = controlDateArray.includes(fullTicketDate);
+
+
+						if (!controlDateInArray) {
+							controlDateArray.push(fullTicketDate);
+							let ticketHour = this.#random(hour, 23);
+							ticketHour = ticketHour < 10 ? `0${ticketHour}` : `${ticketHour}`;
+							let ticketMinute = this.#random(minute, 59);
+							ticketMinute = ticketMinute < 10 ? `0${ticketMinute}` : `${ticketMinute}`;
+							fullTicketDate += `${ticketHour}:${ticketMinute}:00.000Z`;
+							const ticket = new TicketConstructor(fullTicketDate, city, destination, countTickets);
+							ticketsArray.push(ticket.ticket);
+							countTickets += 1;
+						}
 					}
+
+					ticketsArray = this.#sortTicketsArray(ticketsArray);
+
+					ticketsArray.forEach((ticket, i) => ticket.id = `${city.abbreviation} ${i}`);
+
+					city.tickets[destination.name] = ticketsArray;
 				}
-				city.tickets[`${destination.name}`] = this.#sortTicketsArray(city.tickets[`${destination.name}`]);
-				}
+
+
 			});
-			
+
 			return city;
-		})
+		});
 	}
 
-	#randomDate(startDate, endDate) {
-		return startDate + Math.random() * (endDate - startDate);
+	#random(start, end) {
+		return Math.floor((Math.random() * (end - start + 1)) + start);
+	}
+
+	#getDaysInMonth(month) {
+		if (month === 1) {
+			return 28;
+		}
+
+		if (month === 0 || month % 2 === 0) {
+			return 31;
+		}
+
+		return 30;
 	}
 
 	#sortTicketsArray(ticketsArr) {
@@ -180,15 +237,15 @@ class DBFactory {
 		if (arr.length <= 1) {
 			return arr;
 		}
-		
-		let leftArr = []; 
+
+		let leftArr = [];
 		let rightArr = [];
 		for (let i = 1; i < arr.length; i++) {
-			const date1 = new Date(arr[i]).getTime();
-			const date2 = new Date(arr[0]).getTime()
+			const date1 = new Date(arr[i].date).getTime();
+			const date2 = new Date(arr[0].date).getTime();
 			date1 < date2 ? leftArr.push(arr[i]) : rightArr.push(arr[i]);
 		}
-	
+
 		return this.#sortTicketsArray(leftArr).concat(arr[0], this.#sortTicketsArray(rightArr));
 	}
 
@@ -202,9 +259,7 @@ function createDB() {
 	const factory = new DBFactory(dbAviasales);
 	const base = factory.getDB();
 	console.log('Create cities database!!!');
-	return function () {
-		return base;
-	}
+	return base;
 }
 
 
