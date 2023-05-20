@@ -1,83 +1,90 @@
 const crypto = require('crypto');
 
 class User {
-    constructor(json) {
-        this.id = json.id;
-        this.email = json.email;
-        this.firstName = json.firstName;
-        this.lastName = json.lastName;
-        this.birthDate = json.birthDate;
-        this.gender = json.gender;
-        this.mobile = json.mobile;
-        this.citizen = json.citizen;
-        this.password = json.password;
-    }
+	constructor(json) {
+		this.id = 0;
+		this.email = json.email;
+		this.firstName = json.firstName;
+		this.lastName = json.lastName;
+		this.birthDate = json.birthDate;
+		this.gender = json.gender;
+		this.mobile = json.mobile;
+		this.citizen = json.citizen;
+		this.password = json.password;
+	}
 }
 
 class UserRecord {
-    constructor(json) {
-        this.user = new User(json);
-				this.user.tickets = [];
-    }
+	constructor(json) {
+		const id = this.#generateID();
+		this[id] = new User(json);
+		this[id].id = id;
+		this[id].tickets = [];
+	}
 
-		setTicket(ticket) {
-			const ticketCount = this.user.ticket.length;
+	setTicket(ticket) {
+		const ticketCount = this.user.ticket.length;
 
-			ticket.id = ticketCount;
+		ticket.id = ticketCount;
 
-			this.user.ticket.push(ticket);
+		this.user.ticket.push(ticket);
+	}
+
+	getTickets() {
+		return this.user.tickets;
+	}
+
+	getUser() {
+		const id = Object.keys(this)[0];
+		return this[id];
+	}
+
+	#generateID() {
+		const id = [];
+
+		while (id.length < 10) {
+			id.push(Math.floor(Math.random() * 10));
 		}
 
-		getTickets() {
-			return this.user.tickets;
-		}
-
-    getUser() {
-      return this.user;
-    }
+		return id.join('');
+	}
 }
 
 class UserDB {
-  constructor() {
-    this.users = [];
-  }
-  
-  setUser(json) {
-    const index = this.users.indexOf((user) => user.email === json.email);
+	constructor() {
+		this.users = [];
+	}
 
-    if (index === -1) {
-      
-    }
+	setUser(json) {
+		const user = this.users.find((userRecord) => {
+			const id = Object.keys(userRecord)[0];
+			if (json.email === userRecord[id].email) return userRecord;
+		});
 
-    return null;
-  }
+		if (!user) {
+			const record = new UserRecord(json);
+			this.users.push(record);
 
-  #createID(mail) {
-    
-  }
+			return record.getUser();
+		}
 
-  findUser(json) {
-    return this.users.find((user) => user.password === json.password && user.email === json.email);
-  }
+		return null;
+	}
+
+	#createID(mail) {
+
+	}
+
+	findUserByData(json) {
+		return this.users.find((user) => user.password === json.password && user.email === json.email);
+	}
+
+	findUserById(id) {
+		return this.users.find((user) => user.hasOwnProperty(`${id}`));
+	}
 
 }
 
 const userDB = new UserDB();
-
-//mokk data
-
-const mokUser = {
-  id: 1,
-  email: 'pupkin@mail.com',
-  firstName: 'Vasia',
-  lastName: 'Pupkin',
-  birthDate: '1990-01-01T19:00:00',
-  gender: 'male',
-  mobile: '+375297777777',
-  citizen: 'town',
-  password: '123456'
-};
-
-userDB.setUser(mokUser);
 
 module.exports = userDB;
