@@ -59,8 +59,6 @@ router.route('')
 	})
 	.post((req, res) => {
 
-		console.log(req.headers);
-
 		if (req.headers.authorization === 'false') {
 			const result = db.setUser(req.body);
 
@@ -71,8 +69,10 @@ router.route('')
 				return res.json({ reqest: 'User already have been registered!' });
 			}
 
-			res.json(result);
-		} else {
+			return res.json(result);
+		} 
+		
+		if (req.headers.authorization === 'true') {
 
 			const user = db.getUser(req.body);
 
@@ -81,8 +81,11 @@ router.route('')
 				res.json({requst: 'Input data wrong!'});
 			}
 
-			res.send(user);
+			return res.send(user);
 		}
+		
+		res.status(404);
+		return res.json({request: 'Fialed authorization params!'});
 	})
 	.patch((req, res) => {
 		

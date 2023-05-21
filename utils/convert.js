@@ -126,6 +126,13 @@ class TicketConstructor {
 		this.ticket.priceInfant.usa = Math.round(this.ticket.priceAdult.usa * 0.5 * 100) / 100;
 		this.ticket.priceInfant.rub = Math.round(this.ticket.priceAdult.rub * 0.5 * 100) / 100;
 		this.ticket.priceInfant.pln = Math.round(this.ticket.priceAdult.pln * 0.5 * 100) / 100;
+
+		const secondsInWay = Math.round(distance / 0.249999999993);
+
+		const hoursInWay = (secondsInWay - secondsInWay % 3600) / 3600;
+		const minutesInWay = ((secondsInWay - hoursInWay * 3600) - (secondsInWay - hoursInWay * 3600) % 60) / 60;
+
+		this.ticket.wayTime = `${hoursInWay}h ${minutesInWay}min`;
 	}
 
 }
@@ -203,7 +210,10 @@ class DBFactory {
 
 					ticketsArray = this.#sortTicketsArray(ticketsArray);
 
-					ticketsArray.forEach((ticket, i) => ticket.id = `${city.abbreviation} ${i}`);
+					ticketsArray.forEach((ticket, i) =>{
+						ticket.id = `${destination.code} ${i}`;
+						ticket.numberOfFlight = `${destination.code.slice(0, 2)} ${this.#random(1000, 9999)}`;
+					} );
 
 					city.tickets[destination.name] = ticketsArray;
 				}
